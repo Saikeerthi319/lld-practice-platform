@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+.env
+*.db
+*.db-journal
+.DS_Store
+coverage/
+apps/api/prisma/dev.db
+apps/api/tests/test.db
+apps/api/public/
+*.log
+.vite/

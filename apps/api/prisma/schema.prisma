@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Learner {
+  id        String    @id
+  createdAt DateTime  @default(now())
+  attempts  Attempt[]
+}
+
+model Problem {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  title           String
+  statement       String
+  constraintsJson String
+  extensionPrompt String
+  rubricJson      String
+  createdAt       DateTime  @default(now())
+  attempts        Attempt[]
+}
+
+model Attempt {
+  id          String       @id @default(cuid())
+  learnerId   String
+  problemId   String
+  status      String       @default("draft")
+  draftJson   String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  submittedAt DateTime?
+  learner     Learner      @relation(fields: [learnerId], references: [id])
+  problem     Problem      @relation(fields: [problemId], references: [id])
+  submission  Submission?
+  evaluation  Evaluation?
+
+  @@index([learnerId, problemId, createdAt])
+}
+
+model Submission {
+  id        String   @id @default(cuid())
+  attemptId String   @unique
+  format    String   @default("text_v1")
+  payloadJson String
+  createdAt DateTime @default(now())
+  attempt   Attempt  @relation(fields: [attemptId], references: [id])
+}
+
+model Evaluation {
+  id             String    @id @default(cuid())
+  attemptId      String    @unique
+  status         String    @default("pending")
+  evaluatorName  String?
+  findingsJson   String?
+  summary        String?
+  errorMessage   String?
+  rawModelJson   String?
+  createdAt      DateTime  @default(now())
+  completedAt    DateTime?
+  attempt        Attempt   @relation(fields: [attemptId], references: [id])
+}
